@@ -1,8 +1,9 @@
+import EmptyState from "@/components/EmptyState";
 import type { Link } from "@/lib/types";
 
 export default function LinksTab({ links }: { links: Link[] }) {
   if (links.length === 0) {
-    return <p className="text-sm text-gray-500">No links found.</p>;
+    return <EmptyState message="No links found." />;
   }
 
   const internal = links.filter((l) => l.type === "internal");
@@ -20,10 +21,14 @@ function Section({ title, links }: { title: string; links: Link[] }) {
   if (links.length === 0) return null;
   return (
     <div>
-      <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">{title}</h3>
+      <h3 className="panel-section-heading">{title}</h3>
       <ul className="space-y-1">
         {links.map((l, i) => (
-          <li key={i} className="break-all font-mono text-xs text-gray-300">
+          <li
+            key={i}
+            className="break-all font-mono text-xs"
+            style={{ color: "var(--text-secondary)" }}
+          >
             {l.url}
           </li>
         ))}

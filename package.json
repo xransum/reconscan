@@ -11,5 +11,11 @@
     "lint": "npm run lint --workspace=web",
     "format": "npm run format --workspace=web",
     "test": "npm run test --workspace=web"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.8.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13"
   }
 }

@@ -1,8 +1,9 @@
+import EmptyState from "@/components/EmptyState";
 import type { DnsRecord } from "@/lib/types";
 
 export default function DnsTab({ records }: { records: DnsRecord[] }) {
   if (records.length === 0) {
-    return <p className="text-sm text-gray-500">No DNS records found.</p>;
+    return <EmptyState message="No DNS records found." />;
   }
 
   const byType = records.reduce<Record<string, DnsRecord[]>>((acc, r) => {
@@ -12,26 +13,29 @@ export default function DnsTab({ records }: { records: DnsRecord[] }) {
   }, {});
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {Object.entries(byType).map(([type, recs]) => (
         <div key={type}>
-          <h3 className="mb-1.5 text-xs font-semibold uppercase text-gray-500">
-            {type}
-          </h3>
-          <table className="w-full text-left text-sm">
+          <h3 className="panel-section-heading">{type}</h3>
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-gray-800 text-xs text-gray-600">
-                <th className="py-1.5 pr-6">Value</th>
-                <th className="py-1.5">TTL</th>
+              <tr>
+                <th>Value</th>
+                <th className="text-right">TTL</th>
               </tr>
             </thead>
             <tbody>
               {recs.map((r, i) => (
-                <tr key={i} className="border-b border-gray-800/50">
-                  <td className="py-1.5 pr-6 font-mono text-xs text-gray-300">
+                <tr key={i}>
+                  <td className="font-mono text-xs" style={{ color: "var(--cyan)" }}>
                     {r.value}
                   </td>
-                  <td className="py-1.5 font-mono text-xs text-gray-500">{r.ttl}</td>
+                  <td
+                    className="text-right font-mono text-xs tabular-nums"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {r.ttl}
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -1,3 +1,104 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-base: #09090b;
+    --bg-surface: #111113;
+    --bg-raised: #18181b;
+    --bg-subtle: #1e1e23;
+    --border: #2a2a32;
+    --border-bright: #3a3a46;
+    --text-primary: #e4e4ef;
+    --text-secondary: #9494a8;
+    --text-muted: #52525e;
+    --accent: #3b82f6;
+    --accent-dim: #1d4ed8;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --cyan: #06b6d4;
+  }
+
+  html {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+  }
+
+  /* Scrollbar styling for code/pre blocks */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--border-bright);
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+}
+
+@layer components {
+  /* Reusable section heading inside panels */
+  .panel-section-heading {
+    @apply mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)];
+  }
+  .panel-section-heading::after {
+    content: "";
+    @apply block h-px flex-1 bg-[var(--border)];
+  }
+
+  /* Stat chip used in job header */
+  .stat-chip {
+    @apply flex flex-col items-center rounded border border-[var(--border)] bg-[var(--bg-raised)] px-4 py-2.5 text-center;
+  }
+  .stat-chip-value {
+    @apply text-lg font-semibold tabular-nums text-[var(--text-primary)];
+  }
+  .stat-chip-label {
+    @apply mt-0.5 text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)];
+  }
+
+  /* Base table styles */
+  .data-table {
+    @apply w-full text-left text-sm;
+  }
+  .data-table thead tr {
+    @apply border-b border-[var(--border)] text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)];
+  }
+  .data-table thead th {
+    @apply py-2.5 pr-4 last:pr-0;
+  }
+  .data-table tbody tr {
+    @apply border-b border-[var(--border)] transition-colors last:border-0 hover:bg-[var(--bg-subtle)];
+  }
+  .data-table tbody tr:nth-child(even) {
+    @apply bg-[var(--bg-raised)];
+  }
+  .data-table tbody td {
+    @apply py-2 pr-4 last:pr-0;
+  }
+
+  /* Tab button -- inactive */
+  .tab-btn {
+    @apply relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)];
+  }
+  /* Tab button -- active */
+  .tab-btn-active {
+    @apply text-[var(--text-primary)];
+  }
+  .tab-btn-active::after {
+    content: "";
+    @apply absolute bottom-0 left-0 right-0 h-0.5 rounded-t bg-[var(--accent)];
+  }
+
+  /* Badge used on tab buttons for counts */
+  .tab-badge {
+    @apply rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums;
+  }
+}

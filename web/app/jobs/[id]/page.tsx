@@ -11,6 +11,7 @@ import RedirectsTab from "@/components/RedirectsTab";
 import TechnologiesTab from "@/components/TechnologiesTab";
 import TlsTab from "@/components/TlsTab";
 import { getScanResult } from "@/lib/db";
+import type { Job, Redirect, Technology, TlsInfo } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,16 @@ const TABS = [
 ] as const;
 
 type Tab = (typeof TABS)[number];
+
+// Tabs that carry a count badge and which data array to size
+const BADGE_TABS: Partial<Record<Tab, string>> = {
+  Network: "network",
+  Console: "console",
+  Cookies: "cookies",
+  Redirects: "redirects",
+  Links: "links",
+  DNS: "dns",
+};
 
 export default async function JobPage({
   params,
@@ -60,48 +71,66 @@ export default async function JobPage({
     dns_records,
   } = result;
 
+  const counts: Record<string, number> = {
+    network: network_requests.length,
+    console: console_logs.length,
+    cookies: cookies.length,
+    redirects: redirects.length,
+    links: links.length,
+    dns: dns_records.length,
+  };
+
   return (
     <div>
       <JobHeader job={job} />
 
-      {/* Screenshot */}
-      <nav className="mb-6 flex flex-wrap gap-1 border-b border-gray-800 pb-0">
-        {TABS.map((tab) => (
-          <a
-            key={tab}
-            href={`/jobs/${id}?tab=${tab}`}
-            className={`rounded-t px-3 py-1.5 text-sm transition-colors ${
-              activeTab === tab
-                ? "border-b-2 border-blue-500 text-white"
-                : "text-gray-400 hover:text-white"
-            }`}
-          >
-            {tab}
-            {tab === "Network" && network_requests.length > 0 && (
-              <span className="ml-1.5 rounded-full bg-gray-700 px-1.5 py-0.5 text-xs">
-                {network_requests.length}
-              </span>
-            )}
-            {tab === "Console" && console_logs.length > 0 && (
-              <span className="ml-1.5 rounded-full bg-gray-700 px-1.5 py-0.5 text-xs">
-                {console_logs.length}
-              </span>
-            )}
-            {tab === "Cookies" && cookies.length > 0 && (
-              <span className="ml-1.5 rounded-full bg-gray-700 px-1.5 py-0.5 text-xs">
-                {cookies.length}
-              </span>
-            )}
-            {tab === "Redirects" && redirects.length > 0 && (
-              <span className="ml-1.5 rounded-full bg-gray-700 px-1.5 py-0.5 text-xs">
-                {redirects.length}
-              </span>
-            )}
-          </a>
-        ))}
+      {/* Tab bar */}
+      <nav
+        className="mb-0 flex flex-wrap border-b"
+        style={{ borderColor: "var(--border)" }}
+      >
+        {TABS.map((tab) => {
+          const badgeKey = BADGE_TABS[tab];
+          const count = badgeKey ? counts[badgeKey] : 0;
+          const isActive = activeTab === tab;
+          return (
+            <a
+              key={tab}
+              href={`/jobs/${id}?tab=${tab}`}
+              className={`tab-btn${isActive ? "tab-btn-active" : ""}`}
+            >
+              {tab}
+              {count != null && count > 0 && (
+                <span
+                  className="tab-badge"
+                  style={
+                    isActive
+                      ? {
+                          background: "var(--accent-dim)",
+                          color: "#93c5fd",
+                        }
+                      : {
+                          background: "var(--bg-subtle)",
+                          color: "var(--text-muted)",
+                        }
+                  }
+                >
+                  {count}
+                </span>
+              )}
+            </a>
+          );
+        })}
       </nav>
 
-      <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+      {/* Tab content panel */}
+      <div
+        className="rounded-b-lg rounded-tr-lg border border-t-0 p-5"
+        style={{
+          background: "var(--bg-surface)",
+          borderColor: "var(--border)",
+        }}
+      >
         {activeTab === "Summary" && (
           <SummaryTab
             job={job}
@@ -126,7 +155,9 @@ export default async function JobPage({
   );
 }
 
-import type { Job, TlsInfo, Technology, Redirect } from "@/lib/types";
+// ---------------------------------------------------------------------------
+// SummaryTab
+// ---------------------------------------------------------------------------
 
 function SummaryTab({
   job,
@@ -140,17 +171,63 @@ function SummaryTab({
   redirects: Redirect[];
 }) {
   return (
-    <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-      <Field label="URL" value={job.url} mono />
-      <Field label="Status" value={job.status} />
-      <Field label="Job ID" value={job.id} mono />
-      <Field label="Started" value={job.created_at} />
-      {job.completed_at && <Field label="Completed" value={job.completed_at} />}
-      <Field label="Redirects" value={String(redirects.length)} />
-      {tls && <Field label="TLS Issuer" value={tls.issuer} mono />}
-      {tls && <Field label="TLS Expires" value={tls.not_after} />}
-      <Field label="Technologies detected" value={String(technologies.length)} />
-    </dl>
+    <div className="space-y-6">
+      {/* Scan details */}
+      <section>
+        <h2 className="panel-section-heading">Scan details</h2>
+        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Field label="URL" value={job.url} mono wide />
+          <Field label="Status" value={job.status} />
+          <Field label="Job ID" value={job.id} mono />
+          <Field label="Started" value={job.created_at} />
+          {job.completed_at && <Field label="Completed" value={job.completed_at} />}
+          <Field label="Redirects" value={String(redirects.length)} />
+        </dl>
+      </section>
+
+      {/* TLS */}
+      {tls && (
+        <section>
+          <h2 className="panel-section-heading">TLS</h2>
+          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Field label="Issuer" value={tls.issuer} mono />
+            <Field label="Subject" value={tls.subject} mono />
+            <Field label="Expires" value={tls.not_after} />
+          </dl>
+        </section>
+      )}
+
+      {/* Technologies */}
+      <section>
+        <h2 className="panel-section-heading">Technologies ({technologies.length})</h2>
+        {technologies.length === 0 ? (
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            None detected.
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {technologies.map((t, i) => (
+              <span
+                key={i}
+                className="rounded border px-2.5 py-1 text-xs"
+                style={{
+                  borderColor: "var(--border-bright)",
+                  color: "var(--text-secondary)",
+                  background: "var(--bg-raised)",
+                }}
+              >
+                {t.name}
+                {t.version && (
+                  <span className="ml-1" style={{ color: "var(--text-muted)" }}>
+                    {t.version}
+                  </span>
+                )}
+              </span>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
 
@@ -158,18 +235,24 @@ function Field({
   label,
   value,
   mono = false,
+  wide = false,
 }: {
   label: string;
   value: string;
   mono?: boolean;
+  wide?: boolean;
 }) {
   return (
-    <div>
-      <dt className="text-xs font-medium uppercase text-gray-500">{label}</dt>
+    <div className={wide ? "sm:col-span-2 lg:col-span-3" : ""}>
+      <dt
+        className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest"
+        style={{ color: "var(--text-muted)" }}
+      >
+        {label}
+      </dt>
       <dd
-        className={`mt-0.5 break-all text-xs ${
-          mono ? "font-mono text-gray-300" : "text-gray-200"
-        }`}
+        className={`break-all text-sm ${mono ? "font-mono" : ""}`}
+        style={{ color: mono ? "var(--text-secondary)" : "var(--text-primary)" }}
       >
         {value}
       </dd>

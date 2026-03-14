@@ -1,45 +1,75 @@
+import EmptyState from "@/components/EmptyState";
 import type { Cookie } from "@/lib/types";
+
+function BoolBadge({ value }: { value: boolean }) {
+  return value ? (
+    <span
+      className="rounded px-1.5 py-0.5 text-[10px] font-semibold"
+      style={{ background: "#052e16", color: "#4ade80" }}
+    >
+      yes
+    </span>
+  ) : (
+    <span
+      className="rounded px-1.5 py-0.5 text-[10px] font-semibold"
+      style={{ background: "var(--bg-raised)", color: "var(--text-muted)" }}
+    >
+      no
+    </span>
+  );
+}
 
 export default function CookiesTab({ cookies }: { cookies: Cookie[] }) {
   if (cookies.length === 0) {
-    return <p className="text-sm text-gray-500">No cookies recorded.</p>;
+    return <EmptyState message="No cookies recorded." />;
   }
+
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
+      <table className="data-table">
         <thead>
-          <tr className="border-b border-gray-800 text-xs uppercase text-gray-500">
-            <th className="py-2 pr-4">Name</th>
-            <th className="py-2 pr-4">Domain</th>
-            <th className="py-2 pr-4">Path</th>
-            <th className="py-2 pr-4">SameSite</th>
-            <th className="py-2 pr-4">Secure</th>
-            <th className="py-2 pr-4">HttpOnly</th>
-            <th className="py-2">Value</th>
+          <tr>
+            <th>Name</th>
+            <th>Domain</th>
+            <th>Path</th>
+            <th>SameSite</th>
+            <th>Secure</th>
+            <th>HttpOnly</th>
+            <th>Value</th>
           </tr>
         </thead>
         <tbody>
           {cookies.map((c, i) => (
-            <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30">
-              <td className="py-1.5 pr-4 font-mono text-gray-200">{c.name}</td>
-              <td className="py-1.5 pr-4 text-gray-400">{c.domain}</td>
-              <td className="py-1.5 pr-4 text-gray-400">{c.path}</td>
-              <td className="py-1.5 pr-4 text-gray-400">{c.same_site}</td>
-              <td className="py-1.5 pr-4">
-                {c.secure ? (
-                  <span className="text-green-400">yes</span>
-                ) : (
-                  <span className="text-gray-600">no</span>
-                )}
+            <tr key={i}>
+              <td
+                className="font-mono text-xs font-medium"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {c.name}
               </td>
-              <td className="py-1.5 pr-4">
-                {c.http_only ? (
-                  <span className="text-green-400">yes</span>
-                ) : (
-                  <span className="text-gray-600">no</span>
-                )}
+              <td className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                {c.domain}
               </td>
-              <td className="max-w-xs truncate py-1.5 font-mono text-xs text-gray-500">
+              <td
+                className="font-mono text-xs"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                {c.path}
+              </td>
+              <td className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                {c.same_site}
+              </td>
+              <td>
+                <BoolBadge value={c.secure} />
+              </td>
+              <td>
+                <BoolBadge value={c.http_only} />
+              </td>
+              <td
+                className="max-w-xs truncate font-mono text-xs"
+                style={{ color: "var(--text-muted)" }}
+                title={c.value}
+              >
                 {c.value}
               </td>
             </tr>
