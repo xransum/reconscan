@@ -121,6 +121,7 @@ export default async function JobPage({
             <a
               key={tab}
               href={`/jobs/${id}?tab=${tab}`}
+              data-text={tab}
               className={`tab-btn${isActive ? "tab-btn-active" : ""}`}
             >
               {tab}
