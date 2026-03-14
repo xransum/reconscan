@@ -4,8 +4,15 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-echo "==> test: pytest"
+BOLD=$(tput bold 2>/dev/null || true)
+CYAN=$(tput setaf 6 2>/dev/null || true)
+WHITE=$(tput setaf 7 2>/dev/null || true)
+RESET=$(tput sgr0 2>/dev/null || true)
+
+step() { echo "${BOLD}${CYAN}==>${RESET}${BOLD} ${WHITE}${1}${RESET}"; }
+
+step "test: pytest"
 uv run pytest
 
-echo "==> test: jest"
+step "test: jest"
 npm test --workspace=web

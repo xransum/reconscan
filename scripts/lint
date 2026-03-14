@@ -4,11 +4,18 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-echo "==> lint: ruff check"
+BOLD=$(tput bold 2>/dev/null || true)
+CYAN=$(tput setaf 6 2>/dev/null || true)
+WHITE=$(tput setaf 7 2>/dev/null || true)
+RESET=$(tput sgr0 2>/dev/null || true)
+
+step() { echo "${BOLD}${CYAN}==>${RESET}${BOLD} ${WHITE}${1}${RESET}"; }
+
+step "lint: ruff check"
 uv run ruff check reconscan/ tests/
 
-echo "==> lint: mypy"
+step "lint: mypy"
 uv run mypy reconscan/ tests/
 
-echo "==> lint: next lint"
+step "lint: next lint"
 npm run lint --workspace=web
