@@ -345,3 +345,11 @@ vite.config.ts.timestamp-*
 
 # reconscan runtime data
 data/
+data/reconscan.db
+data/reconscan.db-shm
+data/reconscan.db-wal
+data/screenshots/
+
+# reconscan logs
+logs/
+*.log
