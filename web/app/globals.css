@@ -88,19 +88,9 @@
   .tab-btn {
     @apply relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)];
   }
-  /*
-   * Reserve the bold width on every tab so that bolding the active tab
-   * does not shift the layout. The ::before pseudo-element renders the
-   * label text invisibly at bold weight; the visible text sits on top.
-   * data-text must match the tab label (set inline in the JSX).
-   */
-  .tab-btn::before {
-    content: attr(data-text);
-    @apply invisible block h-0 overflow-hidden font-bold;
-  }
   /* Tab button -- active */
   .tab-btn-active {
-    @apply font-bold text-[var(--text-primary)];
+    @apply text-[var(--text-primary)];
   }
   .tab-btn-active::after {
     content: "";
