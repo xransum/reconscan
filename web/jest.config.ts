@@ -6,7 +6,7 @@ const config: Config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
   },
-  setupFilesAfterFramework: ["@testing-library/jest-dom"],
+  setupFilesAfterEnv: ["@testing-library/jest-dom"],
   testMatch: ["**/*.test.ts", "**/*.test.tsx"],
   transform: {
     "^.+\\.(ts|tsx)$": [
