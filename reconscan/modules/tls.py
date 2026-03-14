@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import socket
 import ssl
-from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlparse
 
@@ -58,10 +57,11 @@ async def capture_tls(job_id: str, url: str) -> TlsInfo | None:
 
     try:
         ctx = ssl.create_default_context()
-        with socket.create_connection((host, port), timeout=10) as sock:
-            with ctx.wrap_socket(sock, server_hostname=host) as ssock:
-                der_cert = ssock.getpeercert(binary_form=True)
-                # Fetch the full chain via SSLContext if available
+        with (
+            socket.create_connection((host, port), timeout=10) as sock,
+            ctx.wrap_socket(sock, server_hostname=host) as ssock,
+        ):
+            der_cert = ssock.getpeercert(binary_form=True)
     except Exception:
         return None
 

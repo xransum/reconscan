@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
-import dns.resolver
 import dns.exception
+import dns.resolver
 
 from reconscan.models import DnsRecord
 

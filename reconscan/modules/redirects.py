@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from playwright.async_api import Page, Request, Response
+from playwright.async_api import Page, Response
 
 from reconscan.models import Redirect
 

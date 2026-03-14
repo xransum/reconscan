@@ -10,7 +10,7 @@ from reconscan.models import Technology
 async def capture_technologies(page: Page, job_id: str) -> list[Technology]:
     """Detect technologies present on the loaded page."""
     try:
-        from Wappalyzer import Wappalyzer, WebPage  # type: ignore[import-untyped]
+        from Wappalyzer import Wappalyzer, WebPage
     except ImportError:
         return []
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -12,7 +11,7 @@ class Job:
     url: str
     status: str  # pending | running | complete | failed
     created_at: str
-    completed_at: Optional[str] = None
+    completed_at: str | None = None
 
 
 @dataclass
@@ -102,13 +101,13 @@ class ScanResult:
     """Aggregates all collected data for a single scan job."""
 
     job: Job
-    snapshot: Optional[Snapshot] = None
+    snapshot: Snapshot | None = None
     network_requests: list[NetworkRequest] = field(default_factory=list)
     console_logs: list[ConsoleLog] = field(default_factory=list)
     cookies: list[Cookie] = field(default_factory=list)
-    tls_info: Optional[TlsInfo] = None
+    tls_info: TlsInfo | None = None
     redirects: list[Redirect] = field(default_factory=list)
     technologies: list[Technology] = field(default_factory=list)
     links: list[Link] = field(default_factory=list)
     dns_records: list[DnsRecord] = field(default_factory=list)
-    screenshot_path: Optional[str] = None
+    screenshot_path: str | None = None

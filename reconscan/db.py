@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
-from typing import Optional
 
 from reconscan.models import (
     ConsoleLog,
@@ -139,7 +138,7 @@ def update_job_status(
     conn: sqlite3.Connection,
     job_id: str,
     status: str,
-    completed_at: Optional[str] = None,
+    completed_at: str | None = None,
 ) -> None:
     conn.execute(
         "UPDATE jobs SET status = ?, completed_at = ? WHERE id = ?",
@@ -261,7 +260,7 @@ def insert_dns_records(conn: sqlite3.Connection, records: list[DnsRecord]) -> No
 # ---------------------------------------------------------------------------
 
 
-def get_job(conn: sqlite3.Connection, job_id: str) -> Optional[Job]:
+def get_job(conn: sqlite3.Connection, job_id: str) -> Job | None:
     row = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
     if row is None:
         return None
@@ -274,7 +273,7 @@ def get_job(conn: sqlite3.Connection, job_id: str) -> Optional[Job]:
     )
 
 
-def get_snapshot(conn: sqlite3.Connection, job_id: str) -> Optional[Snapshot]:
+def get_snapshot(conn: sqlite3.Connection, job_id: str) -> Snapshot | None:
     row = conn.execute("SELECT * FROM snapshots WHERE job_id = ?", (job_id,)).fetchone()
     if row is None:
         return None
@@ -334,7 +333,7 @@ def get_cookies(conn: sqlite3.Connection, job_id: str) -> list[Cookie]:
     ]
 
 
-def get_tls_info(conn: sqlite3.Connection, job_id: str) -> Optional[TlsInfo]:
+def get_tls_info(conn: sqlite3.Connection, job_id: str) -> TlsInfo | None:
     row = conn.execute("SELECT * FROM tls_info WHERE job_id = ?", (job_id,)).fetchone()
     if row is None:
         return None

@@ -37,7 +37,7 @@ async def run_scan(
     db_path = data_dir / "reconscan.db"
 
     conn = database.get_connection(db_path)
-    created_at = datetime.datetime.utcnow().isoformat()
+    created_at = datetime.datetime.now(datetime.UTC).isoformat()
 
     job = Job(
         id=job_id,
@@ -94,7 +94,7 @@ async def run_scan(
         if tls_info is not None:
             database.insert_tls_info(conn, tls_info)
 
-        completed_at = datetime.datetime.utcnow().isoformat()
+        completed_at = datetime.datetime.now(datetime.UTC).isoformat()
         database.update_job_status(conn, job_id, "complete", completed_at)
 
         result.snapshot = snapshot
@@ -116,7 +116,7 @@ async def run_scan(
             conn,
             job_id,
             "failed",
-            datetime.datetime.utcnow().isoformat(),
+            datetime.datetime.now(datetime.UTC).isoformat(),
         )
         result.job.status = "failed"
         conn.close()
