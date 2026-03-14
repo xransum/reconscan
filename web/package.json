@@ -12,19 +12,19 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
+    "better-sqlite3": "^12.8.0",
     "highlight.js": "^11.9.0",
     "next": "^15.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "sql.js": "^1.12.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^16.0.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/sql.js": "^1.4.9",
     "autoprefixer": "^10.4.19",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.0.0",

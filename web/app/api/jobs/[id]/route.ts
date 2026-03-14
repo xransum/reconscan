@@ -12,7 +12,7 @@ export async function GET(
     return NextResponse.json({ error: "missing job id" }, { status: 400 });
   }
 
-  const result = await getScanResult(id);
+  const result = getScanResult(id);
   if (result === null) {
     return NextResponse.json({ error: "job not found" }, { status: 404 });
   }

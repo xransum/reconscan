@@ -1,15 +1,14 @@
 /**
  * SQLite read helpers for the web UI.
  *
- * Uses sql.js (SQLite compiled to WASM) so there are no native build
- * requirements. Must only be called server-side (Route Handlers, Server
- * Components, generateStaticParams, etc.) -- never imported by client code.
+ * Uses better-sqlite3 (native synchronous bindings).
+ * Must only be called server-side (Route Handlers, Server Components, etc.)
+ * -- never imported by client code.
  */
 
-import fs from "fs";
 import path from "path";
 
-import initSqlJs, { type Database } from "sql.js";
+import Database from "better-sqlite3";
 
 import type {
   ConsoleLog,
@@ -29,42 +28,8 @@ const DB_PATH =
   process.env["RECONSCAN_DB_PATH"] ??
   path.join(process.cwd(), "..", "data", "reconscan.db");
 
-async function openDb(): Promise<Database> {
-  const SQL = await initSqlJs();
-  const buf = fs.readFileSync(DB_PATH);
-  return new SQL.Database(buf);
-}
-
-function queryAll<T>(
-  db: Database,
-  sql: string,
-  params: (string | number | null)[],
-  mapRow: (row: Record<string, unknown>) => T
-): T[] {
-  const stmt = db.prepare(sql);
-  stmt.bind(params);
-  const results: T[] = [];
-  while (stmt.step()) {
-    results.push(mapRow(stmt.getAsObject({})));
-  }
-  stmt.free();
-  return results;
-}
-
-function queryOne<T>(
-  db: Database,
-  sql: string,
-  params: (string | number | null)[],
-  mapRow: (row: Record<string, unknown>) => T
-): T | null {
-  const stmt = db.prepare(sql);
-  stmt.bind(params);
-  let result: T | null = null;
-  if (stmt.step()) {
-    result = mapRow(stmt.getAsObject({}));
-  }
-  stmt.free();
-  return result;
+function openDb(): Database.Database {
+  return new Database(DB_PATH, { readonly: true, fileMustExist: true });
 }
 
 function mapJob(r: Record<string, unknown>): Job {
@@ -168,88 +133,79 @@ function mapDnsRecord(r: Record<string, unknown>): DnsRecord {
   };
 }
 
-export async function getScanResult(jobId: string): Promise<ScanResult | null> {
-  let db: Database;
+export function getScanResult(jobId: string): ScanResult | null {
+  let db: Database.Database;
   try {
-    db = await openDb();
+    db = openDb();
   } catch {
     return null;
   }
 
   try {
-    const job = queryOne(db, "SELECT * FROM jobs WHERE id = ?", [jobId], mapJob);
-    if (job === null) return null;
+    const job = db.prepare("SELECT * FROM jobs WHERE id = ?").get(jobId) as
+      | Record<string, unknown>
+      | undefined;
+    if (!job) return null;
 
-    const snapshot = queryOne(
-      db,
-      "SELECT * FROM snapshots WHERE job_id = ?",
-      [jobId],
-      mapSnapshot
-    );
+    const snapshotRow = db
+      .prepare("SELECT * FROM snapshots WHERE job_id = ?")
+      .get(jobId) as Record<string, unknown> | undefined;
 
-    const network_requests = queryAll(
-      db,
-      "SELECT * FROM network_requests WHERE job_id = ? ORDER BY id",
-      [jobId],
-      mapNetworkRequest
-    );
+    const network_requests = (
+      db
+        .prepare("SELECT * FROM network_requests WHERE job_id = ? ORDER BY id")
+        .all(jobId) as Record<string, unknown>[]
+    ).map(mapNetworkRequest);
 
-    const console_logs = queryAll(
-      db,
-      "SELECT * FROM console_logs WHERE job_id = ? ORDER BY id",
-      [jobId],
-      mapConsoleLog
-    );
+    const console_logs = (
+      db
+        .prepare("SELECT * FROM console_logs WHERE job_id = ? ORDER BY id")
+        .all(jobId) as Record<string, unknown>[]
+    ).map(mapConsoleLog);
 
-    const cookies = queryAll(
-      db,
-      "SELECT * FROM cookies WHERE job_id = ? ORDER BY id",
-      [jobId],
-      mapCookie
-    );
+    const cookies = (
+      db
+        .prepare("SELECT * FROM cookies WHERE job_id = ? ORDER BY id")
+        .all(jobId) as Record<string, unknown>[]
+    ).map(mapCookie);
 
-    const tls_info = queryOne(
-      db,
-      "SELECT * FROM tls_info WHERE job_id = ?",
-      [jobId],
-      mapTlsInfo
-    );
+    const tlsRow = db.prepare("SELECT * FROM tls_info WHERE job_id = ?").get(jobId) as
+      | Record<string, unknown>
+      | undefined;
 
-    const redirects = queryAll(
-      db,
-      "SELECT * FROM redirects WHERE job_id = ? ORDER BY step",
-      [jobId],
-      mapRedirect
-    );
+    const redirects = (
+      db
+        .prepare("SELECT * FROM redirects WHERE job_id = ? ORDER BY step")
+        .all(jobId) as Record<string, unknown>[]
+    ).map(mapRedirect);
 
-    const technologies = queryAll(
-      db,
-      "SELECT * FROM technologies WHERE job_id = ? ORDER BY name",
-      [jobId],
-      mapTechnology
-    );
+    const technologies = (
+      db
+        .prepare("SELECT * FROM technologies WHERE job_id = ? ORDER BY name")
+        .all(jobId) as Record<string, unknown>[]
+    ).map(mapTechnology);
 
-    const links = queryAll(
-      db,
-      "SELECT * FROM links WHERE job_id = ? ORDER BY type, url",
-      [jobId],
-      mapLink
-    );
+    const links = (
+      db
+        .prepare("SELECT * FROM links WHERE job_id = ? ORDER BY type, url")
+        .all(jobId) as Record<string, unknown>[]
+    ).map(mapLink);
 
-    const dns_records = queryAll(
-      db,
-      "SELECT * FROM dns_records WHERE job_id = ? ORDER BY record_type, value",
-      [jobId],
-      mapDnsRecord
-    );
+    const dns_records = (
+      db
+        .prepare(
+          "SELECT * FROM dns_records WHERE job_id = ? ORDER BY record_type, value"
+        )
+        .all(jobId) as Record<string, unknown>[]
+    ).map(mapDnsRecord);
 
     return {
-      job,
-      snapshot,
+      job: mapJob(job),
+      snapshot: snapshotRow ? mapSnapshot(snapshotRow) : null,
       network_requests,
       console_logs,
       cookies,
-      tls_info,
+      tls_info: tlsRow ? mapTlsInfo(tlsRow) : null,
       redirects,
       technologies,
       links,

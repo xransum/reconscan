@@ -44,7 +44,7 @@ export default async function JobPage({
       ? (rawTab as Tab)
       : "Summary";
 
-  const result = await getScanResult(id);
+  const result = getScanResult(id);
   if (!result) notFound();
 
   const {
