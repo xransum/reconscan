@@ -5,6 +5,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "reconscan",
   description: "URL investigation tool",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
