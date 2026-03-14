@@ -121,7 +121,9 @@ export default async function JobPage({
             <a
               key={tab}
               href={`/jobs/${id}?tab=${tab}`}
-              className={`tab-btn${isActive ? "tab-btn-active" : ""}`}
+              className={["tab-btn", isActive && "tab-btn-active"]
+                .filter(Boolean)
+                .join(" ")}
             >
               {tab}
               {count != null && count > 0 && (
