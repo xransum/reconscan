@@ -39,7 +39,7 @@ function queryAll<T>(
   db: Database,
   sql: string,
   params: (string | number | null)[],
-  mapRow: (row: Record<string, unknown>) => T,
+  mapRow: (row: Record<string, unknown>) => T
 ): T[] {
   const stmt = db.prepare(sql);
   stmt.bind(params);
@@ -55,7 +55,7 @@ function queryOne<T>(
   db: Database,
   sql: string,
   params: (string | number | null)[],
-  mapRow: (row: Record<string, unknown>) => T,
+  mapRow: (row: Record<string, unknown>) => T
 ): T | null {
   const stmt = db.prepare(sql);
   stmt.bind(params);
@@ -184,63 +184,63 @@ export async function getScanResult(jobId: string): Promise<ScanResult | null> {
       db,
       "SELECT * FROM snapshots WHERE job_id = ?",
       [jobId],
-      mapSnapshot,
+      mapSnapshot
     );
 
     const network_requests = queryAll(
       db,
       "SELECT * FROM network_requests WHERE job_id = ? ORDER BY id",
       [jobId],
-      mapNetworkRequest,
+      mapNetworkRequest
     );
 
     const console_logs = queryAll(
       db,
       "SELECT * FROM console_logs WHERE job_id = ? ORDER BY id",
       [jobId],
-      mapConsoleLog,
+      mapConsoleLog
     );
 
     const cookies = queryAll(
       db,
       "SELECT * FROM cookies WHERE job_id = ? ORDER BY id",
       [jobId],
-      mapCookie,
+      mapCookie
     );
 
     const tls_info = queryOne(
       db,
       "SELECT * FROM tls_info WHERE job_id = ?",
       [jobId],
-      mapTlsInfo,
+      mapTlsInfo
     );
 
     const redirects = queryAll(
       db,
       "SELECT * FROM redirects WHERE job_id = ? ORDER BY step",
       [jobId],
-      mapRedirect,
+      mapRedirect
     );
 
     const technologies = queryAll(
       db,
       "SELECT * FROM technologies WHERE job_id = ? ORDER BY name",
       [jobId],
-      mapTechnology,
+      mapTechnology
     );
 
     const links = queryAll(
       db,
       "SELECT * FROM links WHERE job_id = ? ORDER BY type, url",
       [jobId],
-      mapLink,
+      mapLink
     );
 
     const dns_records = queryAll(
       db,
       "SELECT * FROM dns_records WHERE job_id = ? ORDER BY record_type, value",
       [jobId],
-      mapDnsRecord,
+      mapDnsRecord
     );
 
     return {

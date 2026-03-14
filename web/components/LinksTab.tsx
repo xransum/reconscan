@@ -23,7 +23,7 @@ function Section({ title, links }: { title: string; links: Link[] }) {
       <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">{title}</h3>
       <ul className="space-y-1">
         {links.map((l, i) => (
-          <li key={i} className="font-mono text-xs text-gray-300 break-all">
+          <li key={i} className="break-all font-mono text-xs text-gray-300">
             {l.url}
           </li>
         ))}

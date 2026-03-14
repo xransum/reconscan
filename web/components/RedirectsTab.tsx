@@ -11,7 +11,9 @@ export default function RedirectsTab({ redirects }: { redirects: Redirect[] }) {
           <span className="mt-0.5 flex-shrink-0 rounded bg-gray-800 px-2 py-0.5 font-mono text-xs text-gray-400">
             {r.status_code}
           </span>
-          <span className="break-all font-mono text-xs text-gray-300">{r.from_url}</span>
+          <span className="break-all font-mono text-xs text-gray-300">
+            {r.from_url}
+          </span>
           <span className="flex-shrink-0 text-gray-600">-&gt;</span>
           <span className="break-all font-mono text-xs text-gray-300">{r.to_url}</span>
         </li>

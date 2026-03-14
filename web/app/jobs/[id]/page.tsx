@@ -47,7 +47,18 @@ export default async function JobPage({
   const result = await getScanResult(id);
   if (!result) notFound();
 
-  const { job, snapshot, network_requests, console_logs, cookies, tls_info, redirects, technologies, links, dns_records } = result;
+  const {
+    job,
+    snapshot,
+    network_requests,
+    console_logs,
+    cookies,
+    tls_info,
+    redirects,
+    technologies,
+    links,
+    dns_records,
+  } = result;
 
   return (
     <div>
@@ -92,14 +103,21 @@ export default async function JobPage({
 
       <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
         {activeTab === "Summary" && (
-          <SummaryTab job={job} technologies={technologies} tls={tls_info} redirects={redirects} />
+          <SummaryTab
+            job={job}
+            technologies={technologies}
+            tls={tls_info}
+            redirects={redirects}
+          />
         )}
         {activeTab === "Network" && <NetworkTab requests={network_requests} />}
         {activeTab === "Console" && <ConsoleTab logs={console_logs} />}
         {activeTab === "Cookies" && <CookiesTab cookies={cookies} />}
         {activeTab === "TLS" && <TlsTab tls={tls_info} />}
         {activeTab === "Redirects" && <RedirectsTab redirects={redirects} />}
-        {activeTab === "Technologies" && <TechnologiesTab technologies={technologies} />}
+        {activeTab === "Technologies" && (
+          <TechnologiesTab technologies={technologies} />
+        )}
         {activeTab === "Links" && <LinksTab links={links} />}
         {activeTab === "DNS" && <DnsTab records={dns_records} />}
         {activeTab === "DOM" && <DomTab snapshot={snapshot} />}

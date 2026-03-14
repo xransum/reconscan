@@ -111,7 +111,12 @@ describe("types shape checks", () => {
       category: "JavaScript frameworks",
     };
     const link: Link = { job_id: "j", url: "https://x.com/about", type: "internal" };
-    const dns: DnsRecord = { job_id: "j", record_type: "A", value: "93.184.216.34", ttl: 3600 };
+    const dns: DnsRecord = {
+      job_id: "j",
+      record_type: "A",
+      value: "93.184.216.34",
+      ttl: 3600,
+    };
 
     expect(snapshot.html).toBe("<html>");
     expect(req.method).toBe("GET");

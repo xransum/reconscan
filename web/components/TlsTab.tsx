@@ -47,7 +47,9 @@ export default function TlsTab({ tls }: { tls: TlsInfo | null }) {
               >
                 <span className="mr-2 text-gray-600">[{i}]</span>
                 {cert.subject ?? "?"}
-                <span className="ml-2 text-gray-600">issued by {cert.issuer ?? "?"}</span>
+                <span className="ml-2 text-gray-600">
+                  issued by {cert.issuer ?? "?"}
+                </span>
               </li>
             ))}
           </ol>

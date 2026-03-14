@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+echo "==> lint: ruff check"
+uv run ruff check reconscan/ tests/
+
+echo "==> lint: mypy"
+uv run mypy reconscan/ tests/
+
+echo "==> lint: next lint"
+npm run lint --workspace=web

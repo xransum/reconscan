@@ -6,11 +6,7 @@ function statusClass(code: number): string {
   return "text-red-400";
 }
 
-export default function NetworkTab({
-  requests,
-}: {
-  requests: NetworkRequest[];
-}) {
+export default function NetworkTab({ requests }: { requests: NetworkRequest[] }) {
   if (requests.length === 0) {
     return <p className="text-sm text-gray-500">No network requests recorded.</p>;
   }

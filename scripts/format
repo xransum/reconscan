@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+echo "==> format: ruff format"
+uv run ruff format reconscan/ tests/
+
+echo "==> format: prettier"
+npm run format --workspace=web
