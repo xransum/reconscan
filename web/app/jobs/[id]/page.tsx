@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+import ScreenshotPreview from "@/components/ScreenshotPreview";
+
 import ConsoleTab from "@/components/ConsoleTab";
 import CookiesTab from "@/components/CookiesTab";
 import DnsTab from "@/components/DnsTab";
@@ -163,6 +165,8 @@ export default async function JobPage({
             technologies={technologies}
             tls={tls_info}
             redirects={redirects}
+            jobId={id}
+            hasScreenshot={!!snapshot?.screenshot_gif}
           />
         )}
         {activeTab === "Network" && <NetworkTab requests={network_requests} />}
@@ -190,11 +194,15 @@ function SummaryTab({
   technologies,
   tls,
   redirects,
+  jobId,
+  hasScreenshot,
 }: {
   job: Job;
   technologies: Technology[];
   tls: TlsInfo | null;
   redirects: Redirect[];
+  jobId: string;
+  hasScreenshot: boolean;
 }) {
   return (
     <div className="space-y-6">
@@ -253,6 +261,17 @@ function SummaryTab({
           </div>
         )}
       </section>
+
+      {/* Page load preview GIF */}
+      {hasScreenshot && (
+        <section>
+          <h2 className="panel-section-heading">Page load preview</h2>
+          <ScreenshotPreview
+            gifSrc={`/api/jobs/${jobId}/screenshot?format=gif`}
+            jpgHref={`/api/jobs/${jobId}/screenshot?format=jpg`}
+          />
+        </section>
+      )}
     </div>
   );
 }

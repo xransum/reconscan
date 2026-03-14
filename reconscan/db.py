@@ -19,6 +19,14 @@ from reconscan.models import (
     TlsInfo,
 )
 
+_MIGRATIONS = [
+    # v1: path columns -- kept so existing DBs don't error, values are no longer written
+    "ALTER TABLE snapshots ADD COLUMN screenshot_path TEXT",
+    "ALTER TABLE snapshots ADD COLUMN screenshot_gif TEXT",
+    # v2: blob columns
+    "ALTER TABLE snapshots ADD COLUMN screenshot_jpg BLOB",
+]
+
 _SCHEMA = """
 PRAGMA journal_mode=WAL;
 PRAGMA foreign_keys=ON;
@@ -32,9 +40,11 @@ CREATE TABLE IF NOT EXISTS jobs (
 );
 
 CREATE TABLE IF NOT EXISTS snapshots (
-    job_id    TEXT PRIMARY KEY REFERENCES jobs(id),
-    html      TEXT NOT NULL,
-    final_url TEXT NOT NULL
+    job_id          TEXT PRIMARY KEY REFERENCES jobs(id),
+    html            TEXT NOT NULL,
+    final_url       TEXT NOT NULL,
+    screenshot_jpg  BLOB,
+    screenshot_gif  TEXT
 );
 
 CREATE TABLE IF NOT EXISTS network_requests (
@@ -118,6 +128,13 @@ def get_connection(db_path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     conn.executescript(_SCHEMA)
+    for migration in _MIGRATIONS:
+        try:
+            conn.execute(migration)
+            conn.commit()
+        except sqlite3.OperationalError:
+            # Column already exists -- safe to ignore.
+            pass
     return conn
 
 
@@ -150,8 +167,16 @@ def update_job_status(
 
 def insert_snapshot(conn: sqlite3.Connection, snapshot: Snapshot) -> None:
     conn.execute(
-        "INSERT OR REPLACE INTO snapshots (job_id, html, final_url) VALUES (?, ?, ?)",
-        (snapshot.job_id, snapshot.html, snapshot.final_url),
+        "INSERT OR REPLACE INTO snapshots "
+        "(job_id, html, final_url, screenshot_jpg, screenshot_gif) "
+        "VALUES (?, ?, ?, ?, ?)",
+        (
+            snapshot.job_id,
+            snapshot.html,
+            snapshot.final_url,
+            snapshot.screenshot_jpg,
+            snapshot.screenshot_gif,
+        ),
     )
     conn.commit()
 
@@ -278,7 +303,13 @@ def get_snapshot(conn: sqlite3.Connection, job_id: str) -> Snapshot | None:
     row = conn.execute("SELECT * FROM snapshots WHERE job_id = ?", (job_id,)).fetchone()
     if row is None:
         return None
-    return Snapshot(job_id=row["job_id"], html=row["html"], final_url=row["final_url"])
+    return Snapshot(
+        job_id=row["job_id"],
+        html=row["html"],
+        final_url=row["final_url"],
+        screenshot_jpg=bytes(row["screenshot_jpg"]) if row["screenshot_jpg"] else None,
+        screenshot_gif=bytes(row["screenshot_gif"]) if row["screenshot_gif"] else None,
+    )
 
 
 def get_network_requests(conn: sqlite3.Connection, job_id: str) -> list[NetworkRequest]:

@@ -43,10 +43,18 @@ function mapJob(r: Record<string, unknown>): Job {
 }
 
 function mapSnapshot(r: Record<string, unknown>): Snapshot {
+  const toBase64 = (v: unknown): string | null => {
+    if (v == null) return null;
+    if (Buffer.isBuffer(v)) return v.toString("base64");
+    if (v instanceof Uint8Array) return Buffer.from(v).toString("base64");
+    return null;
+  };
   return {
     job_id: r["job_id"] as string,
     html: r["html"] as string,
     final_url: r["final_url"] as string,
+    screenshot_jpg: toBase64(r["screenshot_jpg"]),
+    screenshot_gif: toBase64(r["screenshot_gif"]),
   };
 }
 
@@ -131,6 +139,23 @@ function mapDnsRecord(r: Record<string, unknown>): DnsRecord {
     value: r["value"] as string,
     ttl: r["ttl"] as number,
   };
+}
+
+export function getSnapshot(jobId: string): Snapshot | null {
+  let db: Database.Database;
+  try {
+    db = openDb();
+  } catch {
+    return null;
+  }
+  try {
+    const row = db.prepare("SELECT * FROM snapshots WHERE job_id = ?").get(jobId) as
+      | Record<string, unknown>
+      | undefined;
+    return row ? mapSnapshot(row) : null;
+  } finally {
+    db.close();
+  }
 }
 
 export function getJobs(): Job[] {
@@ -228,7 +253,6 @@ export function getScanResult(jobId: string): ScanResult | null {
       technologies,
       links,
       dns_records,
-      screenshot_path: null,
     };
   } finally {
     db.close();

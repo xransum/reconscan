@@ -33,7 +33,6 @@ async def run_scan(
     timeout: int = 30,
 ) -> ScanResult:
     """Run all collection modules against *url*, persist results, and return ScanResult."""
-    screenshots_dir = data_dir / "screenshots"
     db_path = data_dir / "reconscan.db"
 
     conn = database.get_connection(db_path)
@@ -68,12 +67,20 @@ async def run_scan(
             await page.goto(url, timeout=timeout * 1000, wait_until="networkidle")
 
             # Collect all data in parallel where possible
-            snapshot, technologies, links, screenshot_path = await asyncio.gather(
+            (
+                snapshot,
+                technologies,
+                links,
+                (screenshot_jpg, screenshot_gif),
+            ) = await asyncio.gather(
                 capture_dom(page, job_id),
                 capture_technologies(page, job_id),
                 capture_links(page, job_id),
-                capture_screenshot(page, job_id, screenshots_dir),
+                capture_screenshot(page, job_id),
             )
+
+            snapshot.screenshot_jpg = screenshot_jpg
+            snapshot.screenshot_gif = screenshot_gif
 
             cookies = await capture_cookies(context, job_id)
             await browser.close()
@@ -108,7 +115,6 @@ async def run_scan(
         result.technologies = technologies
         result.links = links
         result.dns_records = dns_records
-        result.screenshot_path = screenshot_path
         result.job.status = "complete"
         result.job.completed_at = completed_at
 

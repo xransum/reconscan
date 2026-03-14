@@ -12,6 +12,8 @@ export interface Snapshot {
   job_id: string;
   html: string;
   final_url: string;
+  screenshot_jpg: string | null; // base64-encoded JPEG
+  screenshot_gif: string | null; // base64-encoded GIF
 }
 
 export interface NetworkRequest {
@@ -92,5 +94,4 @@ export interface ScanResult {
   technologies: Technology[];
   links: Link[];
   dns_records: DnsRecord[];
-  screenshot_path: string | null;
 }

@@ -19,6 +19,8 @@ class Snapshot:
     job_id: str
     html: str
     final_url: str
+    screenshot_jpg: bytes | None = None
+    screenshot_gif: bytes | None = None
 
 
 @dataclass
@@ -110,4 +112,3 @@ class ScanResult:
     technologies: list[Technology] = field(default_factory=list)
     links: list[Link] = field(default_factory=list)
     dns_records: list[DnsRecord] = field(default_factory=list)
-    screenshot_path: str | None = None
