@@ -1,4 +1,39 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 export default function Home() {
+  const router = useRouter();
+  const [url, setUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleScan(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(body.error ?? `Request failed with status ${res.status}`);
+        return;
+      }
+      const data = (await res.json()) as { id: string };
+      router.push(`/jobs/${data.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex flex-col items-center py-20">
       {/* Hero */}
@@ -29,9 +64,70 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Search card */}
+      {/* New scan card */}
       <div
         className="w-full max-w-xl rounded-lg border p-6"
+        style={{
+          background: "var(--bg-surface)",
+          borderColor: "var(--border)",
+        }}
+      >
+        <p
+          className="mb-4 text-xs font-semibold uppercase tracking-widest"
+          style={{ color: "var(--text-muted)" }}
+        >
+          New scan
+        </p>
+        <form onSubmit={handleScan} className="flex gap-2">
+          <div className="relative flex-1">
+            <span
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs"
+              style={{ color: "var(--text-muted)" }}
+            >
+              $
+            </span>
+            <input
+              type="url"
+              name="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com"
+              required
+              autoComplete="off"
+              spellCheck={false}
+              className="w-full rounded border py-2.5 pl-7 pr-3 font-mono text-sm outline-none transition-colors focus:ring-1"
+              style={
+                {
+                  background: "var(--bg-raised)",
+                  borderColor: "var(--border-bright)",
+                  color: "var(--text-primary)",
+                  "--tw-ring-color": "var(--accent)",
+                } as React.CSSProperties
+              }
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 disabled:opacity-50"
+            style={{
+              background: "var(--accent)",
+              ["--tw-ring-color" as string]: "var(--accent)",
+            }}
+          >
+            {loading ? "Scanning..." : "Scan"}
+          </button>
+        </form>
+        {error && (
+          <p className="mt-3 text-xs" style={{ color: "var(--red)" }}>
+            {error}
+          </p>
+        )}
+      </div>
+
+      {/* Load existing results card */}
+      <div
+        className="mt-4 w-full max-w-xl rounded-lg border p-6"
         style={{
           background: "var(--bg-surface)",
           borderColor: "var(--border)",
@@ -84,31 +180,16 @@ export default function Home() {
         </form>
       </div>
 
-      {/* CLI hint */}
-      <div className="mt-10 text-center">
-        <p
-          className="mb-3 text-xs uppercase tracking-widest"
-          style={{ color: "var(--text-muted)" }}
+      {/* View all jobs link */}
+      <div className="mt-6 text-center">
+        <Link
+          href="/jobs"
+          className="text-xs transition-colors hover:underline"
+          style={{ color: "var(--accent)" }}
         >
-          Start a scan
-        </p>
-        <div
-          className="inline-flex items-center gap-3 rounded border px-4 py-2.5 font-mono text-sm"
-          style={{
-            background: "var(--bg-surface)",
-            borderColor: "var(--border)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          <span style={{ color: "var(--accent)" }}>$</span>
-          <span>reconscan scan https://example.com</span>
-        </div>
-        <p className="mt-3 text-xs" style={{ color: "var(--text-muted)" }}>
-          The job UUID is printed to stdout on completion.
-        </p>
+          View all scans
+        </Link>
       </div>
     </div>
   );
 }
-
-import type React from "react";

@@ -80,8 +80,32 @@ export default async function JobPage({
     dns: dns_records.length,
   };
 
+  const isLive = job.status === "running" || job.status === "pending";
+
   return (
     <div>
+      {isLive && (
+        <>
+          {/* Auto-reload every 3 seconds while scan is in progress */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: "setTimeout(function(){location.reload();},3000);",
+            }}
+          />
+          {/* Scanning banner */}
+          <div
+            className="mb-4 rounded border px-4 py-2.5 font-mono text-xs font-semibold"
+            style={{
+              background: "rgba(234,179,8,0.08)",
+              borderColor: "rgba(234,179,8,0.35)",
+              color: "var(--yellow)",
+            }}
+          >
+            scanning... page will refresh automatically
+          </div>
+        </>
+      )}
+
       <JobHeader job={job} />
 
       {/* Tab bar */}

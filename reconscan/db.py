@@ -13,6 +13,7 @@ from reconscan.models import (
     Link,
     NetworkRequest,
     Redirect,
+    ScanResult,
     Snapshot,
     Technology,
     TlsInfo,
@@ -397,6 +398,40 @@ def get_dns_records(conn: sqlite3.Connection, job_id: str) -> list[DnsRecord]:
             record_type=r["record_type"],
             value=r["value"],
             ttl=r["ttl"],
+        )
+        for r in rows
+    ]
+
+
+def get_scan_result(conn: sqlite3.Connection, job_id: str) -> ScanResult | None:
+    """Return a fully-populated ScanResult for *job_id*, or None if not found."""
+    job = get_job(conn, job_id)
+    if job is None:
+        return None
+    return ScanResult(
+        job=job,
+        snapshot=get_snapshot(conn, job_id),
+        network_requests=get_network_requests(conn, job_id),
+        console_logs=get_console_logs(conn, job_id),
+        cookies=get_cookies(conn, job_id),
+        tls_info=get_tls_info(conn, job_id),
+        redirects=get_redirects(conn, job_id),
+        technologies=get_technologies(conn, job_id),
+        links=get_links(conn, job_id),
+        dns_records=get_dns_records(conn, job_id),
+    )
+
+
+def get_all_jobs(conn: sqlite3.Connection) -> list[Job]:
+    """Return all jobs ordered by created_at descending."""
+    rows = conn.execute("SELECT * FROM jobs ORDER BY created_at DESC").fetchall()
+    return [
+        Job(
+            id=r["id"],
+            url=r["url"],
+            status=r["status"],
+            created_at=r["created_at"],
+            completed_at=r["completed_at"],
         )
         for r in rows
     ]

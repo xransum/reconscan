@@ -46,6 +46,8 @@ async def run_scan(
         created_at=created_at,
     )
     database.insert_job(conn, job)
+    # Print job_id immediately so the web API can read it without waiting for the scan
+    print(job_id, flush=True)
 
     result = ScanResult(job=job)
 

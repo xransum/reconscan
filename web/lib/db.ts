@@ -133,6 +133,24 @@ function mapDnsRecord(r: Record<string, unknown>): DnsRecord {
   };
 }
 
+export function getJobs(): Job[] {
+  let db: Database.Database;
+  try {
+    db = openDb();
+  } catch {
+    return [];
+  }
+
+  try {
+    const rows = db
+      .prepare("SELECT * FROM jobs ORDER BY created_at DESC")
+      .all() as Record<string, unknown>[];
+    return rows.map(mapJob);
+  } finally {
+    db.close();
+  }
+}
+
 export function getScanResult(jobId: string): ScanResult | null {
   let db: Database.Database;
   try {
