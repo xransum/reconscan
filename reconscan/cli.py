@@ -42,12 +42,18 @@ def cli() -> None:
     help="Page load timeout in seconds.",
 )
 @click.option(
+    "--browser",
+    default=None,
+    type=click.Choice(["chromium", "firefox", "webkit"], case_sensitive=False),
+    help="Browser to use. Defaults to auto-detect (chromium -> firefox -> webkit).",
+)
+@click.option(
     "--show",
     is_flag=True,
     default=False,
     help="Print a summary of the scan results after completion.",
 )
-def scan(url: str, data_dir: str, headless: bool, timeout: int, show: bool) -> None:
+def scan(url: str, data_dir: str, headless: bool, timeout: int, browser: str | None, show: bool) -> None:
     """Scan URL and store all collected data.
 
     Prints the job ID to stdout on completion.
@@ -65,6 +71,7 @@ def scan(url: str, data_dir: str, headless: bool, timeout: int, show: bool) -> N
                 data_dir=data_path,
                 headless=headless,
                 timeout=timeout,
+                browser=browser,
             )
         )
     except Exception as exc:
