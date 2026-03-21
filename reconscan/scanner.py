@@ -7,7 +7,7 @@ import datetime
 import logging
 from pathlib import Path
 
-from playwright.async_api import async_playwright
+from playwright.async_api import BrowserType, Playwright, async_playwright
 
 from reconscan import db as database
 from reconscan.models import Job, ScanResult
@@ -24,6 +24,29 @@ from reconscan.modules.tls import capture_tls
 
 logger = logging.getLogger(__name__)
 
+_BROWSER_PREFERENCE = ("chromium", "firefox", "webkit")
+
+
+def _browser_type(pw: Playwright, name: str) -> BrowserType:
+    return getattr(pw, name)
+
+
+async def _launch_browser(pw: Playwright, browser: str | None, headless: bool):
+    """Launch the requested browser, or auto-detect the first available one."""
+    candidates = [browser] if browser else list(_BROWSER_PREFERENCE)
+    last_exc: Exception | None = None
+    for name in candidates:
+        bt = _browser_type(pw, name)
+        try:
+            return await bt.launch(headless=headless)
+        except Exception as exc:
+            logger.debug("managed %r binary not available: %s", name, exc)
+            last_exc = exc
+    raise RuntimeError(
+        f"No usable browser found (tried: {candidates}). "
+        "Install a browser with `playwright install firefox`."
+    ) from last_exc
+
 
 async def run_scan(
     job_id: str,
@@ -31,6 +54,7 @@ async def run_scan(
     data_dir: Path,
     headless: bool = True,
     timeout: int = 30,
+    browser: str | None = None,
 ) -> ScanResult:
     """Run all collection modules against *url*, persist results, and return ScanResult."""
     db_path = data_dir / "reconscan.db"
@@ -52,8 +76,8 @@ async def run_scan(
 
     try:
         async with async_playwright() as pw:
-            browser = await pw.chromium.launch(headless=headless)
-            context = await browser.new_context(
+            launched = await _launch_browser(pw, browser, headless)
+            context = await launched.new_context(
                 ignore_https_errors=False,
                 java_script_enabled=True,
             )
@@ -83,7 +107,7 @@ async def run_scan(
             snapshot.screenshot_gif = screenshot_gif
 
             cookies = await capture_cookies(context, job_id)
-            await browser.close()
+            await launched.close()
 
         # Async but not browser-dependent
         tls_info, dns_records = await asyncio.gather(

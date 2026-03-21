@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+BOLD=$(tput bold 2>/dev/null || true)
+CYAN=$(tput setaf 6 2>/dev/null || true)
+WHITE=$(tput setaf 7 2>/dev/null || true)
+RESET=$(tput sgr0 2>/dev/null || true)
+
+step() { echo "${BOLD}${CYAN}==>${RESET}${BOLD} ${WHITE}${1}${RESET}"; }
+
+step "dev: uv sync"
+uv sync
+
+step "dev: npm install"
+npm install
+
+step "dev: playwright install firefox"
+uv run playwright install firefox
+
+step "dev: next dev"
+npm run dev --workspace=web
